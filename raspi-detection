@@ -1,0 +1,89 @@
+import cv2
+import pandas as pd
+import numpy as np
+from picamera.array import PiRGBArray
+from picamera import PiCamera
+import time
+import csv
+
+# Load the pre-trained object detection model
+net = cv2.dnn.readNetFromTensorflow('your_model.pb')
+
+# Account information
+account_info = {
+    "user": "user_name",
+    "account_id": "123456"
+}
+
+# Camera setup
+camera = PiCamera()
+camera.resolution = (640, 480)
+camera.framerate = 32
+rawCapture = PiRGBArray(camera, size=(640, 480))
+
+# Output CSV file setup
+output_file = "detection_results.csv"
+fieldnames = ["image_name", "account_user", "account_id", "detected_objects", "certainty_average"]
+
+# Create CSV and write headers if the file doesn't exist
+if not os.path.exists(output_file):
+    with open(output_file, 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+
+# Process frames from the camera
+for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+    image = frame.array
+
+    # Prepare image for object detection
+    blob = cv2.dnn.blobFromImage(image, size=(300, 300), swapRB=True, crop=False)
+    net.setInput(blob)
+    detections = net.forward()
+
+    detected_objects = []
+    total_confidence = 0
+    object_count = 0
+
+    # Loop over detections
+    for i in range(detections.shape[2]):
+        confidence = detections[0, 0, i, 2]
+
+        if confidence > 0.5:
+            object_count += 1
+            total_confidence += confidence
+
+            # Get the object label and add it to the list
+            label = int(detections[0, 0, i, 1])
+            detected_objects.append(label)
+
+            # Get bounding box coordinates and draw on image (optional)
+            box = detections[0, 0, i, 3:7] * np.array([image.shape[1], image.shape[0], image.shape[1], image.shape[0]])
+            (startX, startY, endX, endY) = box.astype("int")
+            cv2.rectangle(image, (startX, startY), (endX, endY), (0, 255, 0), 2)
+
+    # Calculate certainty average
+    if object_count > 0:
+        certainty_avg = total_confidence / object_count
+    else:
+        certainty_avg = 0
+
+    # Save results to CSV
+    image_name = f"image_{time.strftime('%Y%m%d_%H%M%S')}.jpg"
+    cv2.imwrite(image_name, image)
+
+    with open(output_file, 'a', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writerow({
+            "image_name": image_name,
+            "account_user": account_info['user'],
+            "account_id": account_info['account_id'],
+            "detected_objects": detected_objects,
+            "certainty_average": certainty_avg
+        })
+
+    # Clear the stream for the next frame
+    rawCapture.truncate(0)
+
+    # Break the loop if necessary (optional)
+    if object_count > 0:  # Modify this condition as needed
+        break

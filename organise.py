@@ -2,60 +2,54 @@ import os
 import random
 import shutil
 
-# Set these paths before running
-SOURCE_DIR = "path/to/all_images_and_labels"
-DEST_DIR = "dataset"
-TRAIN_SPLIT = 0.8  # 80% for training, 20% for validation
+# ---- EDIT THESE PATHS BEFORE RUNNING ----
+SOURCE_DIR = r"path\to\all_jpg_and_xml"  # Contains .jpg images + .xml labels
+DEST_DIR = "dataset"                     # Name (or path) of the organized output folder
+TRAIN_RATIO = 0.8                        # 80% train, 20% val
+# -----------------------------------------
 
-# Create folder structure:
-# dataset/images/train, dataset/images/val
-# dataset/labels/train, dataset/labels/val
-os.makedirs(os.path.join(DEST_DIR, "images", "train"), exist_ok=True)
-os.makedirs(os.path.join(DEST_DIR, "images", "val"), exist_ok=True)
-os.makedirs(os.path.join(DEST_DIR, "labels", "train"), exist_ok=True)
-os.makedirs(os.path.join(DEST_DIR, "labels", "val"), exist_ok=True)
+def main():
+    # 1. Make the output folders
+    os.makedirs(os.path.join(DEST_DIR, "images", "train"), exist_ok=True)
+    os.makedirs(os.path.join(DEST_DIR, "images", "val"), exist_ok=True)
+    os.makedirs(os.path.join(DEST_DIR, "labels", "train"), exist_ok=True)
+    os.makedirs(os.path.join(DEST_DIR, "labels", "val"), exist_ok=True)
 
-# Gather all image files (assuming .jpg, .png, .jpeg). Adjust if needed.
-valid_exts = {".jpg", ".jpeg", ".png"}
-image_files = []
-for file_name in os.listdir(SOURCE_DIR):
-    ext = os.path.splitext(file_name)[1].lower()
-    if ext in valid_exts:
-        image_files.append(file_name)
+    # 2. Gather all .jpg files in SOURCE_DIR
+    all_jpg = [f for f in os.listdir(SOURCE_DIR) if f.lower().endswith(".jpg")]
+    random.shuffle(all_jpg)
 
-# Shuffle for random train/val split
-random.shuffle(image_files)
+    total_images = len(all_jpg)
+    train_count = int(TRAIN_RATIO * total_images)
 
-# Determine how many go to training
-num_images = len(image_files)
-train_count = int(TRAIN_SPLIT * num_images)
+    print(f"Found {total_images} .jpg files in '{SOURCE_DIR}'.")
+    print(f"Splitting {train_count} for train, {total_images - train_count} for val.")
 
-print(f"Found {num_images} images. Splitting {train_count} for train, {num_images-train_count} for val.")
+    # 3. Copy function: moves one image + its XML label (if exists)
+    def copy_img_and_xml(jpg_name, subset):
+        # Copy the image
+        src_img = os.path.join(SOURCE_DIR, jpg_name)
+        dst_img = os.path.join(DEST_DIR, "images", subset, jpg_name)
+        shutil.copy2(src_img, dst_img)
 
-# Helper function to copy one image + its label
-def copy_data(img_filename, subset):
-    # e.g., subset is "train" or "val"
-    src_img_path = os.path.join(SOURCE_DIR, img_filename)
-    dst_img_path = os.path.join(DEST_DIR, "images", subset, img_filename)
-    shutil.copy2(src_img_path, dst_img_path)
+        # Copy the matching XML (if present)
+        xml_name = os.path.splitext(jpg_name)[0] + ".xml"
+        src_xml = os.path.join(SOURCE_DIR, xml_name)
+        dst_xml = os.path.join(DEST_DIR, "labels", subset, xml_name)
+        if os.path.exists(src_xml):
+            shutil.copy2(src_xml, dst_xml)
+        else:
+            print(f"Warning: No XML file found for {jpg_name}")
 
-    # Label filename has the same base name, but .txt
-    label_filename = os.path.splitext(img_filename)[0] + ".txt"
-    src_label_path = os.path.join(SOURCE_DIR, label_filename)
-    dst_label_path = os.path.join(DEST_DIR, "labels", subset, label_filename)
+    # 4. Distribute the files between train and val
+    for i, jpg_file in enumerate(all_jpg):
+        if i < train_count:
+            copy_img_and_xml(jpg_file, "train")
+        else:
+            copy_img_and_xml(jpg_file, "val")
 
-    # Only copy if label exists
-    if os.path.exists(src_label_path):
-        shutil.copy2(src_label_path, dst_label_path)
-    else:
-        print(f"Warning: Label file not found for {img_filename}")
+    print("✅ Done! Organized dataset is in:")
+    print(f"   {os.path.abspath(DEST_DIR)}")
 
-# Copy images and labels to train/val folders
-for i, img_file in enumerate(image_files):
-    if i < train_count:
-        copy_data(img_file, "train")
-    else:
-        copy_data(img_file, "val")
-
-print("✅ Dataset organized successfully!")
-print(f"Check the '{DEST_DIR}' folder for the 'train' and 'val' splits.")
+if __name__ == "__main__":
+    main()

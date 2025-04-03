@@ -1,0 +1,6 @@
+train: path/to/your_dataset/images/train
+val: path/to/your_dataset/images/val
+names:
+  - class1
+  - class2
+  # Add more as needed

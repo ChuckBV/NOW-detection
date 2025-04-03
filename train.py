@@ -1,23 +1,17 @@
-# train_new_model.py
-
 from ultralytics import YOLO
 
-# Change these to match your paths and preferred settings:
-OLD_MODEL = "your_old_model.pt"     # Pre-trained model to fine-tune
-DATA_CONFIG = "path/to/data.yaml"   # Data config with train/val info
-EPOCHS = 50
-BATCH_SIZE = 16
-IMAGE_SIZE = 640
-
-def main():
-    model = YOLO(OLD_MODEL)
+def train_model():
+    model = YOLO("your_old_model.pt")  # Start from an existing model (or 'yolov8n.pt' etc.)
     model.train(
-        data=DATA_CONFIG,
-        epochs=EPOCHS,
-        batch=BATCH_SIZE,
-        imgsz=IMAGE_SIZE
+        data="/path/to/data.yaml",
+        epochs=50,
+        imgsz=640,
+        project="my_project",    # your main directory for runs
+        name="my_experiment",    # your run subfolder
+        batch=16,                # choose your batch size
+        lr0=0.01                 # optional: initial learning rate
     )
-    model.val()  # Optional: run validation after training
 
 if __name__ == "__main__":
-    main()
+    train_model()
+    print("Training complete!")

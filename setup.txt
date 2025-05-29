@@ -25,3 +25,19 @@ model.train(
 )
 Replace paths as needed.
 
+
+
+✅ Add Your Venv to Jupyter as a Kernel
+
+Assuming your venv is at:
+
+/project/ai-for-trap-processing-now/venv_yolo
+1. Activate the venv
+source /project/ai-for-trap-processing-now/venv_yolo/bin/activate
+2. Install Jupyter + IPykernel inside it
+pip install ipykernel
+3. Add the kernel
+python -m ipykernel install --user --name=venv_yolo --display-name "YOLO (venv_yolo)"
+--name is the internal ID (used in .ipynb files).
+--display-name is what you’ll see in the Jupyter dropdown.
+

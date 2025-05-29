@@ -1,0 +1,27 @@
+That’s it — ultralytics will handle YOLOv8 and all its internal dependencies. pandas is included just for training metrics.
+
+If you're using a GPU, also check:
+
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+(Adjust cu118 based on your CUDA version — or skip it for CPU-only.)
+
+4. 🧪 Test your setup
+yolo
+You should see the Ultralytics CLI help output. If you don’t, something's wrong.
+
+5. 🏃‍♂️ Run training
+Now run your YOLO training script like:
+
+from ultralytics import YOLO
+
+model = YOLO("yolov8n.pt")  # or your custom .pt model
+model.train(
+    data="your_data.yaml",
+    epochs=25,
+    imgsz=640,
+    batch=8,
+    project="my_project",
+    name="my_experiment"
+)
+Replace paths as needed.
+

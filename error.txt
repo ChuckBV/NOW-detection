@@ -1,0 +1,120 @@
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+       1/25      4.22G       4.01      3.419      1.841        225        640: 100%|██████████| 48/48 [02:17<00:00,  2.86s/it]
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100%|██████████| 6/6 [00:02<00:00,  2.39it/s]
+                   all         95       2649   0.000119   0.000755   5.05e-05   5.05e-06
+---------------------------------------------------------------------------
+AttributeError                            Traceback (most recent call last)
+Cell In[2], line 29
+     25     # Optional: validate after training
+     26     # model.val()
+     28 if __name__ == "__main__":
+---> 29     main()
+
+Cell In[2], line 16, in main()
+     13 model = YOLO(old_model_path)
+     15 # Train:
+---> 16 model.train(
+     17     data=data_file,
+     18     epochs=25,          # Number of training epochs
+     19     imgsz=640,          # Image size
+     20     batch=8,           # Batch size
+     21     project="my_project",# Folder to save training results
+     22     name="my_experiment" # Sub-folder name under 'runs_yolo'
+     23 )
+
+File /project/ai-for-trap-processing-now/test_venv/lib64/python3.9/site-packages/ultralytics/engine/model.py:810, in Model.train(self, trainer, **kwargs)
+    807     self.model = self.trainer.model
+    809 self.trainer.hub_session = self.session  # attach optional HUB session
+--> 810 self.trainer.train()
+    811 # Update model and cfg after training
+    812 if RANK in {-1, 0}:
+
+File /project/ai-for-trap-processing-now/test_venv/lib64/python3.9/site-packages/ultralytics/engine/trainer.py:208, in BaseTrainer.train(self)
+    205         ddp_cleanup(self, str(file))
+    207 else:
+--> 208     self._do_train(world_size)
+
+File /project/ai-for-trap-processing-now/test_venv/lib64/python3.9/site-packages/ultralytics/engine/trainer.py:441, in BaseTrainer._do_train(self, world_size)
+    439     # Save model
+    440     if self.args.save or final_epoch:
+--> 441         self.save_model()
+    442         self.run_callbacks("on_model_save")
+    444 # Scheduler
+
+File /project/ai-for-trap-processing-now/test_venv/lib64/python3.9/site-packages/ultralytics/engine/trainer.py:530, in BaseTrainer.save_model(self)
+    518 # Serialize ckpt to a byte buffer once (faster than repeated torch.save() calls)
+    519 buffer = io.BytesIO()
+    520 torch.save(
+    521     {
+    522         "epoch": self.epoch,
+    523         "best_fitness": self.best_fitness,
+    524         "model": None,  # resume and final checkpoints derive from EMA
+    525         "ema": deepcopy(self.ema.ema).half(),
+    526         "updates": self.ema.updates,
+    527         "optimizer": convert_optimizer_state_dict_to_fp16(deepcopy(self.optimizer.state_dict())),
+    528         "train_args": vars(self.args),  # save as dict
+    529         "train_metrics": {**self.metrics, **{"fitness": self.fitness}},
+--> 530         "train_results": self.read_results_csv(),
+    531         "date": datetime.now().isoformat(),
+    532         "version": __version__,
+    533         "license": "AGPL-3.0 (https://ultralytics.com/license)",
+    534         "docs": "https://docs.ultralytics.com",
+    535     },
+    536     buffer,
+    537 )
+    538 serialized_ckpt = buffer.getvalue()  # get the serialized content to save
+    540 # Save checkpoints
+
+File /project/ai-for-trap-processing-now/test_venv/lib64/python3.9/site-packages/ultralytics/engine/trainer.py:510, in BaseTrainer.read_results_csv(self)
+    508 def read_results_csv(self):
+    509     """Read results.csv into a dict using pandas."""
+--> 510     import pandas as pd  # scope for faster 'import ultralytics'
+    512     return pd.read_csv(self.csv).to_dict(orient="list")
+
+File /project/ai-for-trap-processing-now/test_venv/lib64/python3.9/site-packages/pandas/__init__.py:139
+    121 from pandas.core.reshape.api import (
+    122     concat,
+    123     lreshape,
+   (...)
+    135     qcut,
+    136 )
+    138 from pandas import api, arrays, errors, io, plotting, tseries
+--> 139 from pandas import testing
+    140 from pandas.util._print_versions import show_versions
+    142 from pandas.io.api import (
+    143     # excel
+    144     ExcelFile,
+   (...)
+    172     read_spss,
+    173 )
+
+File /project/ai-for-trap-processing-now/test_venv/lib64/python3.9/site-packages/pandas/testing.py:6
+      1 """
+      2 Public testing utility functions.
+      3 """
+----> 6 from pandas._testing import (
+      7     assert_extension_array_equal,
+      8     assert_frame_equal,
+      9     assert_index_equal,
+     10     assert_series_equal,
+     11 )
+     13 __all__ = [
+     14     "assert_extension_array_equal",
+     15     "assert_frame_equal",
+     16     "assert_series_equal",
+     17     "assert_index_equal",
+     18 ]
+
+File /project/ai-for-trap-processing-now/test_venv/lib64/python3.9/site-packages/pandas/_testing/__init__.py:405
+    400     import pytest
+    402     return pytest.raises(expected_exception, match=None)
+--> 405 cython_table = pd.core.common._cython_table.items()
+    408 def get_cython_table_params(ndframe, func_names_and_expected):
+    409     """
+    410     Combine frame, functions from com._cython_table
+    411     keys and expected result.
+   (...)
+    423         List of three items (DataFrame, function, expected result)
+    424     """
+
+AttributeError: partially initialized module 'pandas' has no attribute 'core' (most likely due to a circular import)

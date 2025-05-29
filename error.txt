@@ -1,21 +1,20 @@
-      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
-       1/25      4.22G       4.01      3.419      1.841        225        640: 100%|██████████| 48/48 [02:17<00:00,  2.86s/it]
-                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100%|██████████| 6/6 [00:02<00:00,  2.39it/s]
-                   all         95       2649   0.000119   0.000755   5.05e-05   5.05e-06
+       1/15      4.45G       4.01      3.419      1.841        225        640: 100%|██████████| 48/48 [01:03<00:00,  1.33s/it]
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100%|██████████| 6/6 [00:02<00:00,  2.57it/s]
+                   all         95       2649   0.000149    0.00113   7.48e-05   7.48e-06
 ---------------------------------------------------------------------------
 AttributeError                            Traceback (most recent call last)
-Cell In[2], line 29
+Cell In[3], line 29
      25     # Optional: validate after training
      26     # model.val()
      28 if __name__ == "__main__":
 ---> 29     main()
 
-Cell In[2], line 16, in main()
+Cell In[3], line 16, in main()
      13 model = YOLO(old_model_path)
      15 # Train:
 ---> 16 model.train(
      17     data=data_file,
-     18     epochs=25,          # Number of training epochs
+     18     epochs=15,          # Number of training epochs
      19     imgsz=640,          # Image size
      20     batch=8,           # Batch size
      21     project="my_project",# Folder to save training results

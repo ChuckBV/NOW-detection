@@ -1,0 +1,31 @@
+import cv2
+import matplotlib.pyplot as plt
+import xml.etree.ElementTree as ET
+
+def show_voc_annotated_image(img_path, xml_path):
+    # Load image
+    image = cv2.imread(img_path)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    # Parse XML
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+
+    # Draw each bounding box
+    for obj in root.findall('object'):
+        name = obj.find('name').text
+        bbox = obj.find('bndbox')
+        xmin = int(float(bbox.find('xmin').text))
+        ymin = int(float(bbox.find('ymin').text))
+        xmax = int(float(bbox.find('xmax').text))
+        ymax = int(float(bbox.find('ymax').text))
+
+        # Draw rectangle and label
+        cv2.rectangle(image, (xmin, ymin), (xmax, ymax), (255, 0, 0), 2)
+        cv2.putText(image, name, (xmin, ymin - 5),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1)
+
+    # Show result
+    plt.imshow(image)
+    plt.axis('off')
+    plt.show()

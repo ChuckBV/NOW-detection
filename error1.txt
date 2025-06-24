@@ -1,0 +1,64 @@
+---------------------------------------------------------------------------
+FileNotFoundError                         Traceback (most recent call last)
+File /project/ai-for-trap-processing-now/venv_now/lib64/python3.9/site-packages/ultralytics/engine/trainer.py:603, in BaseTrainer.get_dataset(self)
+    597 elif self.args.data.rsplit(".", 1)[-1] in {"yaml", "yml"} or self.args.task in {
+    598     "detect",
+    599     "segment",
+    600     "pose",
+    601     "obb",
+    602 }:
+--> 603     data = check_det_dataset(self.args.data)
+    604     if "yaml_file" in data:
+
+File /project/ai-for-trap-processing-now/venv_now/lib64/python3.9/site-packages/ultralytics/data/utils.py:463, in check_det_dataset(dataset, autodownload)
+    462     m += f"\nNote dataset download directory is '{DATASETS_DIR}'. You can update this in '{SETTINGS_FILE}'"
+--> 463     raise FileNotFoundError(m)
+    464 t = time.time()
+
+FileNotFoundError: Dataset 'test_venv/data-Copy1.yaml' images not found, missing path '/test_venv/NOW_train_new/images/val'
+Note dataset download directory is '/project/ai-for-trap-processing-now/datasets'. You can update this in '/home/zachary.dawson/.config/Ultralytics/settings.json'
+
+The above exception was the direct cause of the following exception:
+
+RuntimeError                              Traceback (most recent call last)
+Cell In[21], line 24
+     20     # Optional: validate after training
+     21     # model.val()
+     23 if __name__ == "__main__":
+---> 24     main()
+
+Cell In[21], line 11, in main()
+      8 model = YOLO(old_model_path)
+     10 # Train:
+---> 11 model.train(
+     12     data=data_file,
+     13     epochs=25,          # Number of training epochs
+     14     imgsz=640,          # Image size
+     15     batch=16,           # Batch size
+     16     project="runs_yolo",# Folder to save training results
+     17     name="my_experiment" # Sub-folder name under 'runs_yolo'
+     18 )
+
+File /project/ai-for-trap-processing-now/venv_now/lib64/python3.9/site-packages/ultralytics/engine/model.py:791, in Model.train(self, trainer, **kwargs)
+    788 if args.get("resume"):
+    789     args["resume"] = self.ckpt_path
+--> 791 self.trainer = (trainer or self._smart_load("trainer"))(overrides=args, _callbacks=self.callbacks)
+    792 if not args.get("resume"):  # manually set model only if not resuming
+    793     self.trainer.model = self.trainer.get_model(weights=self.model if self.ckpt else None, cfg=self.model.yaml)
+
+File /project/ai-for-trap-processing-now/venv_now/lib64/python3.9/site-packages/ultralytics/engine/trainer.py:153, in BaseTrainer.__init__(self, cfg, overrides, _callbacks)
+    151 self.model = check_model_file_from_stem(self.args.model)  # add suffix, i.e. yolo11n -> yolo11n.pt
+    152 with torch_distributed_zero_first(LOCAL_RANK):  # avoid auto-downloading dataset multiple times
+--> 153     self.data = self.get_dataset()
+    155 self.ema = None
+    157 # Optimization utils init
+
+File /project/ai-for-trap-processing-now/venv_now/lib64/python3.9/site-packages/ultralytics/engine/trainer.py:607, in BaseTrainer.get_dataset(self)
+    605             self.args.data = data["yaml_file"]  # for validating 'yolo train data=url.zip' usage
+    606 except Exception as e:
+--> 607     raise RuntimeError(emojis(f"Dataset '{clean_url(self.args.data)}' error ❌ {e}")) from e
+    608 if self.args.single_cls:
+    609     LOGGER.info("Overriding class names with single class.")
+
+RuntimeError: Dataset 'test_venv/data-Copy1.yaml' error ❌ Dataset 'test_venv/data-Copy1.yaml' images not found, missing path '/test_venv/NOW_train_new/images/val'
+Note dataset download directory is '/project/ai-for-trap-processing-now/datasets'. You can update this in '/home/zachary.dawson/.config/Ultralytics/settings.json'

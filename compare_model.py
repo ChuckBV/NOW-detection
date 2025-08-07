@@ -1,12 +1,11 @@
-import torch
+from ultralytics import YOLO
 import cv2
 import os
 import matplotlib.pyplot as plt
+import numpy as np
 
-model1 = torch.load('runs_yolo/model1/weights/best.pt')
-model2 = torch.load('runs_yolo/model2/weights/best.pt')
-model1.eval()
-model2.eval()
+model1 = YOLO('runs_yolo/my_experiment7/weights/best.pt')
+model2 = YOLO('runs_yolo/my_experiment15/weights/best.pt')
 
 def run_model(model, image):
     img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -16,7 +15,7 @@ def run_model(model, image):
         return boxes.conf.cpu().numpy()
     return []
 
-folder = 'test_venv/USE-now-images'
+folder = 'USE-now-images'  # Look for image folder in current dir
 paths = [os.path.join(folder, f) for f in os.listdir(folder) if f.lower().endswith(('.jpg', '.png', '.jpeg'))]
 
 conf1 = []
@@ -27,10 +26,15 @@ for path in paths:
     conf1.extend(run_model(model1, img))
     conf2.extend(run_model(model2, img))
 
-plt.hist(conf1, bins=10, alpha=0.5, label='Model 1')
-plt.hist(conf2, bins=10, alpha=0.5, label='Model 2')
-plt.title('Confidence Score Distribution')
-plt.xlabel('Confidence')
+plt.hist(conf1, bins=20, alpha=0.5, label='Model 1', color='blue', edgecolor='black')
+plt.hist(conf2, bins=20, alpha=0.5, label='Model 2', color='red', edgecolor='black')
+plt.axvline(np.mean(conf1), color='blue', linestyle='--', linewidth=2, label=f'Model 1 Mean: {np.mean(conf1):.2f}')
+plt.axvline(np.mean(conf2), color='red', linestyle='--', linewidth=2, label=f'Model 2 Mean: {np.mean(conf2):.2f}')
+
+plt.title('YOLO Model Confidence Score Comparison')
+plt.xlabel('Confidence Score')
 plt.ylabel('Frequency')
 plt.legend()
+plt.grid(True)
+plt.savefig('confidence_comparison.png', dpi=300, bbox_inches='tight')
 plt.show()

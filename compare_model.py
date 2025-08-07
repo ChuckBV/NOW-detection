@@ -15,8 +15,8 @@ def run_model(model, image):
         return boxes.conf.cpu().numpy()
     return []
 
-folder = 'USE-now-images'  # Look for image folder in current dir
-paths = [os.path.join(folder, f) for f in os.listdir(folder) if f.lower().endswith(('.jpg', '.png', '.jpeg'))]
+# Scan images in current working directory
+paths = [f for f in os.listdir() if f.lower().endswith(('.jpg', '.png', '.jpeg'))]
 
 conf1 = []
 conf2 = []

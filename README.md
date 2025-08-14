@@ -58,7 +58,8 @@ model.train(
 - `modelTest.py`: Runs predictions and outputs images with bounding boxes
 - `model_analytics_demo.py`: Loads trained model and shows visual metrics
 - `model_analytics_function.py`: Helper functions for plotting precision, recall, confidence, and loss
-- `compare_model.py`:Graphs confidence scores for 2 models 
+- `compare_model.py`:Graphs confidence scores for 2 models
+- `count-export.py`put in folder to script and get out NOW counts csv
 
 
 ### Prediction and Metrics
